@@ -23,7 +23,7 @@ app.get('/api/:name', async (req, res) => {
 })
 
 app.listen(port, () => {
-  console.log(`Example app listening at http://localhost:${port}`)
+  console.log(`listening at http://localhost:${port}`)
 })
 
 async function getSnap(name) {
