@@ -1,7 +1,4 @@
 {
     "version": 2,
-    "name": "snapcraft-api",
-    "routes": [
-      { "src": "/(.*)", "dest": "/index.js" }
-    ]
-  }
+    "name": "snapcraft-api"
+}
