@@ -13,6 +13,10 @@ app.use(
 
 app.options('*', cors());
 
+app.get('/' , (req, res) => {
+  res.send({title : "It is run"});
+})
+
 app.get('/api/:name', async (req, res) => {
   let snap = await getSnap(req.params.name);
   res.send(softSnap(snap));
