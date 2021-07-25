@@ -19,6 +19,9 @@ app.get('/' , (req, res) => {
 
 app.get('/api/:name', async (req, res) => {
   let snap = await getSnap(req.params.name);
+  if(snap["error-list"]) {
+    res.send(snap)
+  }
   res.send(softSnap(snap));
 })
 
