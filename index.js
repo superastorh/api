@@ -27,46 +27,47 @@ app.get("/", (req, res) => {
 
 app.get("/snap/download/:name", async (req, res) => {
   try {
-    let { data: info } = await snap.get("/v2/snaps/info/" + req.params.name);
-    let { data: details } = await snap.get(
-      "/api/v1/snaps/details/" + req.params.name
+    let { data: info } = await snap.get(
+      `/v2/snaps/info/${req.params.name}?fields=media,title,publisher,download`
     );
 
     //
     res.send({
       details: {
-        title: details.title,
-        icon: details.icon_url,
-        publisher: details.publisher,
+        title: info.snap.title,
+        icon: getIconUrl(info.snap.media),
+        publisher: info.snap.publisher["display-name"],
         name: req.params.name,
       },
-      download: downloadSize(info),
+      download: getDownloads(info),
     });
   } catch (e) {
+    console.log(e);
     res.sendStatus(404);
   }
 });
 
 app.get("/snap/search/:name", async (req, res) => {
   try {
-    const result = await snap.get("/v2/snaps/find?q=" + req.params.name);
+    const result = await snap.get(
+      "https://api.snapcraft.io/v2/snaps/find?fields=media,title&q=" +
+        req.params.name
+    );
+
     // Get fist 10 result
-    const snapsList = result.data.results.slice(0, 10);
+    let snapsList = result.data.results.slice(0, 10);
 
-    // Get icon for all snaps
-    const snapsPromise = snapsList.map(async ({ name }) => {
-      const { data: details } = await snap.get("/api/v1/snaps/details/" + name);
-
-      return {
-        title: details.title,
-        name,
-        icon: details.icon_url,
-      };
-    });
+    // Map  search list
+    snapsList = snapsList.map((item) => ({
+      title: item.snap.title,
+      name: item.name,
+      icon: getIconUrl(item.snap.media),
+    }));
 
     //
-    res.send(await Promise.all(snapsPromise));
+    res.send(snapsList);
   } catch (e) {
+    console.log(e);
     res.sendStatus(404);
   }
 });
@@ -75,7 +76,15 @@ app.listen(port, () => {
   console.log(`Example app listening at http://localhost:${port}`);
 });
 
-function downloadSize(snapInfo) {
+function getIconUrl(mediaObj) {
+  const icon = mediaObj.find((_media) => _media.type === "icon") || {
+    url: "",
+  };
+
+  return icon.url;
+}
+
+function getDownloads(snapInfo) {
   // Get support architecture in this snap
   const architectures = Array.from(snapInfo["channel-map"]).map(
     (e) => e.channel.architecture
