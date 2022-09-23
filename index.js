@@ -78,7 +78,7 @@ app.listen(port, () => {
 
 function getIconUrl(mediaObj) {
   const icon = mediaObj.find((_media) => _media.type === "icon") || {
-    url: "",
+    url: "https://assets.ubuntu.com/v1/be6eb412-snapcraft-missing-icon.svg",
   };
 
   return icon.url;
